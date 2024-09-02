@@ -12,8 +12,10 @@ struct ContentView: View {
     @State private var correctAnswer = Int.random(in: 0...2)
     
     @State private var showingScore = false
+    @State private var showingFinalAlert = false
     @State private var scoreTitle = ""
     @State private var score = 0
+    @State private var rounds = 0
     var body: some View {
         ZStack {
             /*
@@ -21,7 +23,7 @@ struct ContentView: View {
              .ignoresSafeArea()
              */
             RadialGradient(stops: [
-                .init(color: Color(red: 0.1, green: 0.2, blue: 0.45), location: 0.5),
+                .init(color: Color(red: 0.1, green: 0.2, blue: 0.45), location: 0.3),
                 .init(color: Color(red: 0.76, green: 0.15, blue: 0.26), location: 0.3)
                 
             ], center: .top, startRadius: 200, endRadius: 400)
@@ -59,6 +61,13 @@ struct ContentView: View {
                 } message: {
                     Text("Your score is \(score)")
                 }
+                .alert("Round Complete", isPresented: $showingFinalAlert) {
+                    Button("Restart", action: resetGame)
+                } message: {
+                    Text("Your final score is \(score)")
+                }
+                
+                
                 Spacer()
                 Spacer()
                 
@@ -72,11 +81,17 @@ struct ContentView: View {
     }
     
     func flagTapped(_ number: Int) {
+        rounds += 1
         if number == correctAnswer {
-            scoreTitle = "Correct"
             score += 1
+            scoreTitle = "Correct"
         } else {
-            scoreTitle = "Wrong"
+            score -= 1
+            scoreTitle = "Wrong, that is the flag of \(countries[number])"
+        }
+
+        if rounds >= 8 {
+            showingFinalAlert = true
         }
         showingScore = true
     }
@@ -84,6 +99,12 @@ struct ContentView: View {
     func askQuestion() {
         countries.shuffle()
         correctAnswer = Int.random(in: 0...2)
+    }
+    
+    func resetGame() {
+        score = 0
+        rounds = 0
+        askQuestion()
     }
 }
 
